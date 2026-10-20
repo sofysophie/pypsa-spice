@@ -6,6 +6,10 @@
 
 # Base configuration includes paths and general settings which are not relevant to the scenario settings or model constraints.
 
+# coding: utf-8
+
+# Base configuration includes paths and general settings which are not relevant to the scenario settings or model constraints.
+
 version: 0.1.0
 
 logging:
@@ -14,15 +18,15 @@ logging:
 
 #####Init settings#####
 path_configs:
-  data_folder_name: example
-  project_name: project_01
-  input_scenario_name: scenario_01
-  output_scenario_name: scenario_01_tag1
+  data_folder_name: Colombia
+  project_name: Expansion 26-40
+  input_scenario_name: BAU
+  output_scenario_name: BAU results
 
 base_configs:
-  regions:
-    XY: ["NR","CE", "SO"] # list of countries (keys) and subregions (values in list). Countries in ISO2 format
-    YZ: ["NR","CE", "SO"] # list of countries (keys) and subregions (values in list). Countries in ISO2 format
-  years: [2025, 2030, 2035, 2040, 2045, 2050] # list of modelled years
-  sector: ["p-i-t"] # options: ["p", "p-i", "p-t", "p-i-t"], representing power (p), industry (i), and transport (t) sectors.
+  countries: ["CO"] # list of countries in ISO2 format
+  regions: 
+    CO: ["ANT", "CAR", "NOR", "OR", "SUR"]
+  years: [2026, 2030, 2035, 2040] # list of modelled years
+  sector: ["p"] # options: ["p", "p-i", "p-t", "p-i-t"], representing power (p), industry (i), and transport (t) sectors.
   currency: USD # currency for the model in all uppercases, ISO4217 format
