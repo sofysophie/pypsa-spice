@@ -1,0 +1,149 @@
+powerplant_type,cap__usd_mw,fom__usd_mwa,vom__usd_mwh,life__years,country,year,source
+BATS,470000.0,15000.0,2.0,15,CO,2026,Catálogo tecnológico - Iones de litio GE - P315
+BATS,280000.0,10830.0,1.44,20,CO,2030,Catálogo tecnológico - Iones de litio GE - P315
+BATS,280000.0,10830.0,1.44,20,CO,2035,Catálogo tecnológico - Iones de litio GE - P315
+BATS,280000.0,10830.0,1.44,20,CO,2040,Catálogo tecnológico - Iones de litio GE - P315
+BIOT,2560000.0,60700.0,3.82,25,CO,2026,Catálogo tecnológico - Biomasa - P181
+BIOT,2470000.0,58400.0,3.68,25,CO,2030,Catálogo tecnológico - Biomasa - P181
+BIOT,2470000.0,58400.0,3.68,25,CO,2035,Catálogo tecnológico - Biomasa - P181
+BIOT,2470000.0,58400.0,3.68,25,CO,2040,Catálogo tecnológico - Biomasa - P181
+CCGT,1100000.0,32900.0,1.74,25,CO,2026,Catálogo tecnológico - Ciclo combinado - P222
+CCGT,1090000.0,32500.0,1.71,25,CO,2030,Catálogo tecnológico - Ciclo combinado - P222
+CCGT,1090000.0,32500.0,1.71,25,CO,2035,Catálogo tecnológico - Ciclo combinado - P222
+CCGT,1090000.0,32500.0,1.71,25,CO,2040,Catálogo tecnológico - Ciclo combinado - P222
+CHP,1700000.0,49000.0,3.0,25,CO,2026,Example
+CHP,1600000.0,45500.0,2.5,25,CO,2030,Example
+CHP,1600000.0,45500.0,2.5,25,CO,2035,Example
+CHP,1600000.0,45500.0,2.5,25,CO,2040,Example
+CSP,6329134.0,68945.0,3.6934,30,CO,2026,2025 ATB Data Solar – CSP Capex (121) FOM (132) VOM (143)
+CSP,4971730.0,57266.0,3.1236,30,CO,2030,2025 ATB Data Solar – CSP Capex (121) FOM (132) VOM (143)
+CSP,4794205.0,56485.0,3.1236,30,CO,2035,2025 ATB Data Solar – CSP Capex (121) FOM (132) VOM (143)
+CSP,4616681.0,55704.0,3.1236,30,CO,2040,2025 ATB Data Solar – CSP Capex (121) FOM (132) VOM (143)
+DAC,600000.0,25.0,0.0,25,CO,2026,Example
+DAC,450000.0,15.0,0.0,25,CO,2030,Example
+DAC,350000.0,13.0,0.0,25,CO,2035,Example
+DAC,350000.0,13.0,0.0,25,CO,2040,Example
+EDLH,2040000.0,82000.0,0.0,30,CO,2026,Example
+EDLH,2040000.0,82000.0,0.0,30,CO,2030,Example
+EDLH,2040000.0,82000.0,0.0,30,CO,2035,Example
+EDLH,2040000.0,82000.0,0.0,30,CO,2040,Example
+EERH,2900000.0,120000.0,0.0,30,CO,2026,Example
+EERH,2900000.0,120000.0,0.0,30,CO,2030,Example
+EERH,2900000.0,120000.0,0.0,30,CO,2035,Example
+EERH,2900000.0,120000.0,0.0,30,CO,2040,Example
+EHPP,650000.0,25000.0,0.0,30,CO,2026,Example
+EHPP,650000.0,25000.0,0.0,30,CO,2030,Example
+EHPP,650000.0,25000.0,0.0,30,CO,2035,Example
+EHPP,650000.0,25000.0,0.0,30,CO,2040,Example
+EIDT,400000.0,18000.0,0.0,30,CO,2026,Example
+EIDT,400000.0,18000.0,0.0,30,CO,2030,Example
+EIDT,400000.0,18000.0,0.0,30,CO,2035,Example
+EIDT,400000.0,18000.0,0.0,30,CO,2040,Example
+ELTZ,650000.0,21000.0,0.0,18,CO,2026,Example
+ELTZ,350000.0,19000.0,0.0,18,CO,2030,Example
+ELTZ,300000.0,15000.0,0.0,18,CO,2035,Example
+ELTZ,300000.0,15000.0,0.0,18,CO,2040,Example
+EVCH-PRV,10000.0,1.0,1.0,20,CO,2026,Example
+EVCH-PRV,10000.0,1.0,1.0,20,CO,2030,Example
+EVCH-PRV,10000.0,1.0,1.0,20,CO,2035,Example
+EVCH-PRV,10000.0,1.0,1.0,20,CO,2040,Example
+EVCH-PUB,10000.0,1.0,1.0,20,CO,2026,Example
+EVCH-PUB,10000.0,1.0,1.0,20,CO,2030,Example
+EVCH-PUB,10000.0,1.0,1.0,20,CO,2035,Example
+EVCH-PUB,10000.0,1.0,1.0,20,CO,2040,Example
+EVST_PRV,2000000.0,690.0,0.0,30,CO,2026,Example
+EVST_PRV,1500000.0,690.0,0.0,30,CO,2030,Example
+EVST_PRV,1200000.0,690.0,0.0,30,CO,2035,Example
+EVST_PRV,1200000.0,690.0,0.0,30,CO,2040,Example
+EVST_PUB,1330000.0,690.0,0.0,30,CO,2026,Example
+EVST_PUB,1330000.0,690.0,0.0,30,CO,2030,Example
+EVST_PUB,1287142.85714286,690.0,0.0,30,CO,2035,Example
+EVST_PUB,1240952.38095238,690.0,0.0,30,CO,2040,Example
+FITR,1070000.0,32000.0,6.0,100,CO,2026,Example
+FITR,1070000.0,32000.0,6.0,100,CO,2030,Example
+FITR,1070000.0,32000.0,6.0,100,CO,2035,Example
+FITR,1070000.0,32000.0,6.0,100,CO,2040,Example
+GEOT,4720000.0,89800.0,0.3,30,CO,2026,Catálogo tecnológico - Flash - P161
+GEOT,4440000.0,84600.0,0.29,30,CO,2030,Catálogo tecnológico - Flash - P161
+GEOT,4440000.0,84600.0,0.29,30,CO,2035,Catálogo tecnológico - Flash - P161
+GEOT,4440000.0,84600.0,0.29,30,CO,2040,Catálogo tecnológico - Flash - P161
+HDAM,2500000.0,55000.0,0.0,50,CO,2026,Catálogo tecnológico - Embalse - P142
+HDAM,2500000.0,54900.0,0.0,50,CO,2030,Catálogo tecnológico - Embalse - P142
+HDAM,2500000.0,54900.0,0.0,50,CO,2035,Catálogo tecnológico - Embalse - P142
+HDAM,2500000.0,54900.0,0.0,50,CO,2040,Catálogo tecnológico - Embalse - P142
+HHBS,1300000.0,42276.0,5.6,15,CO,2026,Catálogo tecnológico - Iones de litio PE - P317
+HHBS,800000.0,30522.0,4.1,20,CO,2030,Catálogo tecnológico - Iones de litio PE - P317
+HHBS,800000.0,30522.0,4.1,20,CO,2035,Catálogo tecnológico - Iones de litio PE - P317
+HHBS,800000.0,30522.0,4.1,20,CO,2040,Catálogo tecnológico - Iones de litio PE - P317
+HPHS,1200000.0,24000.0,0.0,50,CO,2026,Catálogo tecnológico - Bombeo - P327
+HPHS,1200000.0,24000.0,0.0,50,CO,2030,Catálogo tecnológico - Bombeo - P327
+HPHS,1200000.0,24000.0,0.0,50,CO,2035,Catálogo tecnológico - Bombeo - P327
+HPHS,1200000.0,24000.0,0.0,50,CO,2040,Catálogo tecnológico - Bombeo - P327
+HROR,2500000.0,55000.0,0.0,50,CO,2026,Catálogo tecnológico - Filo de agua - P138
+HROR,2500000.0,54900.0,0.0,50,CO,2030,Catálogo tecnológico - Filo de agua - P138
+HROR,2500000.0,54900.0,0.0,50,CO,2035,Catálogo tecnológico - Filo de agua - P138
+HROR,2500000.0,54900.0,0.0,50,CO,2040,Catálogo tecnológico - Filo de agua - P138
+IND_BOILER,220000.0,50000.0,6.0,25,CO,2026,Example
+IND_BOILER,220000.0,50000.0,6.0,25,CO,2030,Example
+IND_BOILER,220000.0,50000.0,6.0,25,CO,2035,Example
+IND_BOILER,220000.0,50000.0,6.0,25,CO,2040,Example
+INLHSTOR,400000.0,600.0,0.0,30,CO,2026,Example
+INLHSTOR,340000.0,500.0,0.0,30,CO,2030,Example
+INLHSTOR,280000.0,400.0,0.0,30,CO,2035,Example
+INLHSTOR,280000.0,400.0,0.0,30,CO,2040,Example
+METH,870000.0,30000.0,0.0,30,CO,2026,Example
+METH,670980.0,23000.0,0.0,30,CO,2030,Example
+METH,572930.0,20000.0,0.0,30,CO,2035,Example
+METH,572930.0,20000.0,0.0,30,CO,2040,Example
+NUCL,20000000.0,110000.0,2.2,30,CO,2026,Catálogo tecnológico - SMR - P292
+NUCL,9600000.0,110000.0,2.2,40,CO,2030,Catálogo tecnológico - SMR - P292
+NUCL,9600000.0,110000.0,2.2,40,CO,2035,Catálogo tecnológico - SMR - P292
+NUCL,9600000.0,110000.0,2.2,40,CO,2040,Catálogo tecnológico - SMR - P292
+OCGT,970000.0,29400.0,5.52,25,CO,2026,Catálogo tecnológico - Ciclo simple - P234
+OCGT,960000.0,29000.0,5.45,25,CO,2030,Catálogo tecnológico - Ciclo simple - P234
+OCGT,960000.0,29000.0,5.45,25,CO,2035,Catálogo tecnológico - Ciclo simple - P234
+OCGT,960000.0,29000.0,5.45,25,CO,2040,Catálogo tecnológico - Ciclo simple - P234
+OCHT,650000.0,39000.0,2.0,30,CO,2026,Example
+OCHT,640000.0,38000.0,2.0,30,CO,2030,Example
+OCHT,640000.0,35000.0,2.0,30,CO,2035,Example
+OCHT,640000.0,35000.0,2.0,30,CO,2040,Example
+OILT,2138031.544,38791.75904,5.21302346,25,CO,2026,Example
+OILT,2137511.265,38791.75904,5.21302346,25,CO,2030,Example
+OILT,2140595.816,38791.75904,5.21302346,25,CO,2035,Example
+OILT,2140595.816,38791.75904,5.21302346,25,CO,2040,Example
+PEVCH,0.0,0.0,0.0,10,CO,2026,Example
+PEVCH,0.0,0.0,0.0,10,CO,2030,Example
+PEVCH,0.0,0.0,0.0,10,CO,2035,Example
+PEVCH,0.0,0.0,0.0,10,CO,2040,Example
+PHOT,1030000.0,7400.0,0.0,27,CO,2026,Catálogo tecnológico - Gran escala - P68
+PHOT,710000.0,7400.0,0.0,30,CO,2030,Catálogo tecnológico - Gran escala - P68
+PHOT,710000.0,6300.0,0.0,30,CO,2035,Catálogo tecnológico - Gran escala - P68
+PHOT,690000.0,6300.0,0.0,30,CO,2040,Catálogo tecnológico - Gran escala - P68
+RTPV,1360000.0,17000.0,0.0,27,CO,2026,Catálogo tecnológico - Residencial - P62
+RTPV,940000.0,14600.0,0.0,30,CO,2030,Catálogo tecnológico - Residencial - P62
+RTPV,940000.0,14600.0,0.0,30,CO,2035,Catálogo tecnológico - Residencial - P62
+RTPV,940000.0,14600.0,0.0,30,CO,2040,Catálogo tecnológico - Residencial - P62
+SubC,1800000.0,50500.0,1.26,30,CO,2026,Aproximación Super Crítica (No se expande)
+SubC,1780000.0,49900.0,1.25,30,CO,2030,Aproximación Super Crítica (No se expande)
+SubC,1780000.0,49900.0,1.25,30,CO,2035,Aproximación Super Crítica (No se expande)
+SubC,1780000.0,49900.0,1.25,30,CO,2040,Aproximación Super Crítica (No se expande)
+SupC,1800000.0,50500.0,1.26,30,CO,2026,Catálogo tecnológico - Supercrítica carbón - P210
+SupC,1780000.0,49900.0,1.25,30,CO,2030,Catálogo tecnológico - Supercrítica carbón - P210
+SupC,1780000.0,49900.0,1.25,30,CO,2035,Catálogo tecnológico - Supercrítica carbón - P210
+SupC,1780000.0,49900.0,1.25,30,CO,2040,Catálogo tecnológico - Supercrítica carbón - P210
+SWHT,1350000.0,16500.0,0.0,20,CO,2026,Example
+SWHT,1300000.0,16500.0,0.0,20,CO,2030,Example
+SWHT,1250000.0,16500.0,0.0,20,CO,2035,Example
+SWHT,1250000.0,16500.0,0.0,20,CO,2040,Example
+WSTT,5380000.0,432000.0,36.54,25,CO,2026,Catálogo tecnológico - Waste to energy - P256
+WSTT,5310000.0,427000.0,36.1,25,CO,2030,Catálogo tecnológico - Waste to energy - P256
+WSTT,5310000.0,427000.0,36.1,25,CO,2035,Catálogo tecnológico - Waste to energy - P256
+WSTT,5310000.0,427000.0,36.1,25,CO,2040,Catálogo tecnológico - Waste to energy - P256
+WTOF,4300000.0,108500.0,0.0,27,CO,2026,Catálogo tecnológico - Cimentación fija - P111
+WTOF,3200000.0,81000.0,0.0,30,CO,2030,Catálogo tecnológico - Cimentación fija - P111
+WTOF,3200000.0,81000.0,0.0,30,CO,2035,Catálogo tecnológico - Cimentación fija - P111
+WTOF,3200000.0,81000.0,0.0,30,CO,2040,Catálogo tecnológico - Cimentación fija - P111
+WTON,1370000.0,27400.0,0.0,27,CO,2026,Catálogo tecnológico - Gran escala - P90
+WTON,1370000.0,27400.0,0.0,30,CO,2030,Catálogo tecnológico - Gran escala - P90
+WTON,1370000.0,27400.0,0.0,30,CO,2035,Catálogo tecnológico - Gran escala - P90
+WTON,1370000.0,27400.0,0.0,30,CO,2040,Catálogo tecnológico - Gran escala - P90

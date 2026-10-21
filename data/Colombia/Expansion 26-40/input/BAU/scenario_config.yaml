@@ -1,0 +1,160 @@
+
+# SPDX-FileCopyrightText: PyPSA-SPICE Developers
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+# coding: utf-8
+
+# Scenario configuration includes model constraints, scenario and solver settings.
+
+version: 0.1.0
+
+logging:
+  level: INFO
+  format: "%(levelname)s:%(name)s:%(message)s"
+
+#####Scenario settings#####
+scenario_configs:
+  snapshots:
+    start: "2026-01-01"
+    end: "2027-01-01"  # shall be should be "12-31" if base year is a leap year
+    inclusive: "left"
+  resolution:
+    method: "nth_hour" # options: ["nth_hour", "clustered"]
+    number_of_days: 3 # the number of representative days (used fo "clustered" method)
+    stepsize: 25 # used for "nth_hour" method
+  interest:
+  # interest rate in decimals (e.g. 0.05 represents 5%)
+    CO: 0.09 # Please fill here
+  remove_threshold: 0.1 # unit: MW (remove assests with capacity below this threshold)
+
+
+#####Model constraints#####
+co2_management:
+  # please indicate country/region specific CO2 management options
+  # options: ["co2_cap", "co2_price"]
+  # "co2_cap" is a cap on the total CO2 emissions in the system. Values are in mtCO2.
+  # "co2_price" is a price on CO2 emissions in the system.Values are in currency/tonne of CO2.
+  CO:
+    option: "co2_price"
+    value:
+      2026: 8 # Please fill here
+      2030: 8 # Please fill here
+      2035: 8 # Please fill here
+      2040: 8 # Please fill here
+
+custom_constraints:
+  # please indicate country/region and their specific custom constraints
+  CO:
+    energy_independence:
+      activate: false  # Change this to true for activating this constraint
+      pe_conv_fraction:
+        Solar: 1 # Please fill here
+        Wind: 1 # Please fill here
+        Geothermal: 1 # Please fill here
+        Water: 1 # Please fill here
+      ei_fraction:
+        2026: 0.5 # Please fill here
+        2030: 0.5 # Please fill here
+        2035: 0.5 # Please fill here
+        2040: 0.5 # Please fill here
+    production_constraint_fuels:
+      activate: false  # Change this to true for activating this constraint
+      fuels: ["Gas", "Bit", "Oil", "Bio"] # Please fill here
+    reserve_margin:
+      activate: false  # Change this to true for activating this constraint
+      epsilon_load: 0.1 # Please fill here
+      epsilon_vre: 0.0 # Please fill here
+      contingency: 0 # Please fill here
+      method: "static" # static or dynamic. If static, ignore epsilon_vre
+    res_generation:
+      activate: false  # Change this to true for activating this constraint
+      math_symbol: "<="
+      res_generation_share:
+        2026: 5 # Please fill here
+        2030: 5 # Please fill here
+        2035: 5 # Please fill here
+        2040: 5 # Please fill here
+    thermal_must_run:
+      activate: false  # Change this to true for activating this constraint
+      min_must_run_ratio: 0 # Please fill here
+    capacity_factor_constraint:
+      activate: false  # Change this to true for activating this constraint
+      value:
+        2026: 5 # Please fill here
+        2030: 5 # Please fill here
+        2035: 5 # Please fill here
+        2040: 5 # Please fill here
+    maximum_power_generation_constraint:
+  # maximum power generation per techology, country and year (TWh)
+      activate: false  # Change this to true for activating this constraint
+      value:
+        2026: 5 # Please fill here
+        2030: 5 # Please fill here
+        2035: 5 # Please fill here
+        2040: 5 # Please fill here
+
+#####Solver settings#####
+solving:
+  solver:
+    name: highs
+    options: highs-default
+  oetc:
+    activate: false
+    name: test-agora-job
+    cpu_cores: 4
+    disk_space_gb: 20
+    delete_worker_on_error: false
+  solver_options:
+    default: {} # used if no solver option is available
+    cbc-default:
+      threads: 8
+      cuts: 0 # no cuts
+      maxsol: 1 # only one solution
+      ratio: 0.1 # ratio of the solution to the best solution
+      presolve: 1 # presolve on
+      time_limit: 3600 # time limit in seconds
+    gurobi-default:
+      threads: 8
+      method: 2 # barrier
+      crossover: 0
+      BarConvTol: 1.e-5
+      AggFill: 0
+      PreDual: 0
+      GURO_PAR_BARDENSETHRESH: 200
+    gurobi-numeric-focus:
+      name: gurobi
+      NumericFocus: 3 # Favour numeric stability over speed
+      method: 2 # barrier
+      crossover: 0 # do not use crossover
+      BarHomogeneous: 1 # Use homogeneous barrier if standard does not converge
+      BarConvTol: 1.e-5
+      FeasibilityTol: 1.e-4
+      OptimalityTol: 1.e-4
+      ObjScale: -0.5
+      threads: 8
+      Seed: 123
+    cplex-default:
+      threads: 4
+      lpmethod: 4 # barrier
+      solutiontype: 2 # non basic solution, ie no crossover
+      barrier_convergetol: 1.e-5
+      feasopt_tolerance: 1.e-6
+    highs-default:
+      # refer to https://ergo-code.github.io/HiGHS/dev/options/definitions/
+      threads: 4
+      solver: "ipm"
+      run_crossover: "off"
+      small_matrix_value: 1e-6
+      large_matrix_value: 1e9
+      primal_feasibility_tolerance: 1e-5
+      dual_feasibility_tolerance: 1e-5
+      ipm_optimality_tolerance: 1e-4
+      parallel: "on"
+      random_seed: 123
+    highs-simplex:
+      solver: "simplex"
+      parallel: "on"
+      primal_feasibility_tolerance: 1e-5
+      dual_feasibility_tolerance: 1e-5
+      random_seed: 123

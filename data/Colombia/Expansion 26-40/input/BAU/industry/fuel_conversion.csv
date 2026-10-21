@@ -1,0 +1,2 @@
+country,link,bus0,bus1,bus2,bus3,type,carrier,p_nom,p_nom_extendable,p_nom_max_2026,p_nom_max_2030,p_nom_max_2035,p_nom_max_2040,p_nom_min_2026,p_nom_min_2030,p_nom_min_2035,p_nom_min_2040
+CO,CO_ANT_HVELEC_to_CO_HYDN_by_ELTZ,CO_ANT_HVELEC,CO_HYDN,,,ELTZ,Hyd,Please fill here,Please fill here,Please fill here,Please fill here,Please fill here,Please fill here,Please fill here,Please fill here,Please fill here,Please fill here
