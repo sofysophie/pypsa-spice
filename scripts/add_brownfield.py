@@ -36,6 +36,7 @@ from _helpers import (
     get_store_min_availabilities,
     get_time_series_demands,
     load_scenario_config,
+    read_global_input,
     update_ev_char_parameters,
     update_ev_store_parameters,
     update_storage_costs,
@@ -350,6 +351,7 @@ class AddFutureAssets:
         self.dmd_profile_path = snakemake.input.dmd_profiles
         self.availability_dir = snakemake.input.pp_availability
         self.inflows_path = snakemake.input.stor_inflows
+        self.scenario = snakemake.config["path_configs"]["input_scenario_name"]
         self.currency = snakemake.params.currency
         self.scenario_configs = scenario_configs
         self.interest = self.scenario_configs["scenario_configs"]["interest"]
@@ -449,6 +451,7 @@ class AddFutureAssets:
             year=self.year,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
         storage_capacity = storage_capacity[(storage_capacity["p_nom_extendable"])]
 
@@ -464,6 +467,7 @@ class AddFutureAssets:
             store_inflow = get_storage_units_inflows(
                 storage_capacity=indexed_inflow_storage_unit.reset_index(),
                 inflows_path=self.inflows_path,
+                scenario=self.scenario,
             ).reindex(indexed_inflow_storage_unit.index)
             indexed_inflow_storage_unit.index = [
                 s + f"_{str(self.year)}" for s in indexed_inflow_storage_unit.index
@@ -613,6 +617,7 @@ class AddFutureAssets:
             year=self.year,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
 
         storage_energy = storage_energy[
@@ -656,7 +661,9 @@ class AddFutureAssets:
             country_regions=self.country_region,
             include_both_country_n_regional_rows=True,
         )
-        final_load = get_time_series_demands(load_df, self.dmd_profile_path, self.year)
+        final_load = get_time_series_demands(
+            load_df, self.dmd_profile_path, self.year, scenario=self.scenario
+        )
         final_load.reset_index(["country", "bus", "carrier", "node"], inplace=True)
         p_set = (
             final_load.T.loc[
@@ -701,6 +708,7 @@ class AddFutureAssets:
             year=self.year,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
 
         clean_pps = clean_pps[clean_pps["p_nom_extendable"]]
@@ -711,6 +719,7 @@ class AddFutureAssets:
                 clean_pps.reset_index(),
                 self.availability_dir,
                 self.technologies_dir,
+                scenario=self.scenario,
             ).reindex(clean_gen.index)
             clean_gen.index = [s + f"_{str(self.year)}" for s in clean_gen.index]
             gen_avail.index = clean_gen.index
@@ -730,6 +739,8 @@ class AddFutureAssets:
                 p_min_pu=clean_gen["p_min_pu"],
                 ramp_limit_up=clean_gen["ramp_limit_up"],
                 ramp_limit_down=clean_gen["ramp_limit_down"],
+                ramp_up_cost=clean_gen["ramp_up_cost"],
+                ramp_down_cost=clean_gen["ramp_down_cost"],
                 efficiency=clean_gen["efficiency"],
                 capital_cost=clean_gen["capital_cost"],
                 marginal_cost=clean_gen["marginal_cost"],
@@ -769,6 +780,7 @@ class AddFutureAssets:
             year=self.year,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
         links_df = links_df[links_df["p_nom_extendable"]]
 
@@ -783,7 +795,10 @@ class AddFutureAssets:
             links_df["efficiency3"] = 0
         links_df.set_index("link", inplace=True)
         links_avail = get_link_availabilities(
-            raw_links_df, self.availability_dir, self.technologies_dir
+            raw_links_df,
+            self.availability_dir,
+            self.technologies_dir,
+            scenario=self.scenario,
         ).reindex(links_df.index)
         # add year information to index
         links_df.index = [s + f"_{str(self.year)}" for s in links_df.index]
@@ -811,6 +826,8 @@ class AddFutureAssets:
             p_nom_min=links_df["p_nom_min"],
             ramp_limit_up=links_df["ramp_limit_up"],
             ramp_limit_down=links_df["ramp_limit_down"],
+            ramp_up_cost=links_df["ramp_up_cost"],
+            ramp_down_cost=links_df["ramp_down_cost"],
             p_nom_extendable=True,
             build_year=self.year,
             lifetime=links_df["lifetime"],
@@ -825,7 +842,9 @@ class AddFutureAssets:
     def add_ev_chargers(self):
         """Add new PEV chargers to the PyPSA network."""
         ev_links_df = pd.read_csv(snakemake.input.tra_pev_chargers).set_index("link")
-        tech_cost_df = pd.read_csv(snakemake.input.power_plant_costs)
+        tech_cost_df = read_global_input(
+            snakemake.input.power_plant_costs, self.scenario
+        )
         tech_cost_df = tech_cost_df[
             (tech_cost_df["country"].str.contains("|".join(self.country)))
         ].set_index(["powerplant_type", "country"])
@@ -841,11 +860,13 @@ class AddFutureAssets:
             cost_df=tech_cost_df,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
         link_p_max_pu = get_link_availabilities(
             ev_links_df.reset_index(),
             self.availability_dir,
             self.technologies_dir,
+            scenario=self.scenario,
         ).reindex(ev_links.index)
         ev_links.index = [s + f"_{str(self.year)}" for s in ev_links.index]
         link_p_max_pu.index = ev_links.index
@@ -888,11 +909,14 @@ class AddFutureAssets:
             tech_table=ev_storages,
             year=self.year,
             ev_param_dir=snakemake.input.ev_parameters,
+            scenario=self.scenario,
         )
         ev_storages.index = [s + f"_{str(self.year)}" for s in ev_storages.index]
         ev_storages.index.name = "name"
         ev_store_e_min_pu = get_store_min_availabilities(
-            ev_storages.reset_index(), avail_dir=self.availability_dir
+            ev_storages.reset_index(),
+            avail_dir=self.availability_dir,
+            scenario=self.scenario,
         )
         ev_store_e_min_pu.index = ev_storages.index
         ev_store_e_min_pu = ev_store_e_min_pu.T.iloc[self.red_hours].set_index(

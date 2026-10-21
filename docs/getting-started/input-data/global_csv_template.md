@@ -6,7 +6,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
 
 # Input data: global CSV template
 
-Global CSVs contain parameters that are typically kept constant accross scenarios. This is to maintain comparability of the scenarios. `global_input_template` folder is used for the purpose of creating skeletons, and thus it can be considered as hidden folder inside the template.
+Global CSVs contain parameters that are typically kept constant accross scenarios. This is to maintain comparability of the scenarios. If needed, rows can be assigned to specific scenarios using the [scenario column](#scenario-column). `global_input_template` folder is used for the purpose of creating skeletons, and thus it can be considered as hidden folder inside the template.
 
 ```text title="Structure of the global CSV template files"
 📦 data
@@ -27,6 +27,33 @@ Global CSVs contain parameters that are typically kept constant accross scenario
 
 !!! Tip
     The currency of all example data is `USD` defined in the `base_configs` section of `base_config.yaml`. You can refer to [Model builder configuration](model-builder-configuration.md#base_configyaml) for more information.
+
+## Scenario column
+
+All scenarios of a project share the same `global_input` folder. The first column of every global CSV, `scenario`, defines which input scenario(s) each row applies to. This allows scenario-specific global data (e.g. different technology costs or demand profiles) without changing the folder structure.
+
+When the model runs, only the rows that list the `input_scenario_name` set in `base_config.yaml` are used. The `scenario` column is then removed, so the rest of the table is read as usual.
+
+- Write the input scenario name, i.e. the name of the scenario folder (e.g. `scenario_01`).
+- If a row applies to several scenarios, separate the names with `;` (e.g. `scenario_01;scenario_02`).
+- Each row must list at least one scenario. Rows with an empty `scenario` cell are ignored.
+
+```text title="Example: power_plant_costs.csv with a different solar PV cost in scenario_02"
+scenario,powerplant_type,cap__usd_mw,fom__usd_mwa,vom__usd_mwh,life__years,country,year,source
+scenario_01;scenario_02,BATS,311000,0,2.3,20,XY,2025,Example
+scenario_01,PHOT,800000,12000,0,25,XY,2025,Example
+scenario_02,PHOT,600000,12000,0,25,XY,2025,Example
+```
+
+When `build_skeleton` creates a new project, the `scenario` column of all global CSVs is filled with the `input_scenario_name`. When you add a scenario to an existing project, the global CSVs are not changed: add the new scenario name to the `scenario` column of the rows it should use.
+
+The model builder checks the `scenario` column when reading each global CSV:
+
+| Check                                                 | Result                                                                                            |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| No `scenario` column                                  | Warning. All rows are used.                                                                       |
+| Rows with an empty `scenario` cell                    | Warning with the CSV line numbers. These rows are ignored.                                        |
+| `input_scenario_name` not found in the `scenario` column | Error listing the available scenario names and the closest match, e.g. to spot a typo.            |
 
 ## Availability
 
@@ -107,5 +134,7 @@ Description of all technical parameters:
 | `p_min_pu`                | The minimum availability per snapshot per unit of `p_nom`                                                                                                                          |
 | `ramp_limit_down`         | Maximum active power decrease from one snapshot to the next (per unit)                                                                                                             |
 | `ramp_limit_up`           | Maximum active power increase from one snapshot to the next (per unit)                                                                                                             |
+| `ramp_up_cost`            | Cost of increasing power output by 1 MW from one snapshot to the next (currency/MW). Used only if `ramp_costs` is activated in the scenario config                                 |
+| `ramp_down_cost`          | Cost of decreasing power output by 1 MW from one snapshot to the next (currency/MW). Used only if `ramp_costs` is activated in the scenario config                                 |
 | `standing_loss`           | Hourly energy loss from storage                                                                                                                                                    |
 | `r_rating`                | Contribution of reserve rating (if used)                                                                                                                                           |
