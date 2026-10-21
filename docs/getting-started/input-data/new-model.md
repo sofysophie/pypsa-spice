@@ -107,7 +107,7 @@ This step creates your skeleton folder and files which can be feed with your dat
 ```
 
 !!! Tip
-    Once you’ve created a skeleton data folder for one scenario, you can simply duplicate the scenario folder and rename the folder name to set up additional scenarios. However, we recommend doing this only after you’ve completed filling in the data for the first one.  
+    Once you’ve created a skeleton data folder for one scenario, you can simply duplicate the scenario folder and rename the folder name to set up additional scenarios. However, we recommend doing this only after you’ve completed filling in the data for the first one. Remember to also add the new scenario name to the `scenario` column of the global CSVs (see [Scenario column](global_csv_template.md#scenario-column)).  
 
 ## Step 3: Save your input data systematically
 
@@ -158,3 +158,5 @@ Once all the necessary input data is provided, you can adjust model and solver s
     Most of the time, after creating the first project folder and an initial scenario (for example, the base or reference scenario), you can simply copy that scenario folder and rename it to create a new scenario. Since new scenarios are usually compared to the base or reference scenario, this approach saves time because you don’t need to re-enter all the input data.
 
     Alternatively, you can use build_skeleton to create a new empty scenario folder inside an existing project. This will generate the correct folder structure but leave all input files empty, so you will need to fill in the data manually.
+
+    In both cases, the global CSVs are shared by all scenarios. Add the new scenario name to the `scenario` column of the rows it should use (see [Scenario column](global_csv_template.md#scenario-column)).

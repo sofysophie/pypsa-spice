@@ -28,6 +28,7 @@ from _helpers import (
     get_storage_units_inflows,
     get_store_min_availabilities,
     get_time_series_demands,
+    read_global_input,
     update_ev_char_parameters,
     update_ev_store_parameters,
     update_storage_costs,
@@ -55,6 +56,7 @@ class AddBaseNetwork:
         self.dmd_profile_path = snakemake.input.dmd_profiles
         self.availability_dir = snakemake.input.pp_availability
         self.inflows_path = snakemake.input.stor_inflows
+        self.scenario = snakemake.config["path_configs"]["input_scenario_name"]
         self.currency = snakemake.params.currency
         self.scenario_configs = scenario_configs
         self.interest = self.scenario_configs["scenario_configs"]["interest"]
@@ -198,6 +200,7 @@ class AddBaseNetwork:
             year=self.year,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
 
         # add StorageUnit (storage_capacity)
@@ -213,6 +216,7 @@ class AddBaseNetwork:
                 get_storage_units_inflows(
                     storage_capacity=indexed_inflow_storage_unit.reset_index(),
                     inflows_path=self.inflows_path,
+                    scenario=self.scenario,
                 )
                 .reindex(indexed_inflow_storage_unit.index)
                 .T.set_index(self.network.snapshots)
@@ -345,6 +349,7 @@ class AddBaseNetwork:
             year=self.year,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
 
         self.network.add(
@@ -374,7 +379,9 @@ class AddBaseNetwork:
             country_regions=self.country_region,
             include_both_country_n_regional_rows=True,
         )
-        final_load = get_time_series_demands(load_df, self.dmd_profile_path, self.year)
+        final_load = get_time_series_demands(
+            load_df, self.dmd_profile_path, self.year, scenario=self.scenario
+        )
         final_load.reset_index(["country", "bus", "carrier", "node"], inplace=True)
         self.network.add(
             class_name="Load",
@@ -411,6 +418,7 @@ class AddBaseNetwork:
             year=self.year,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
         clean_gen = clean_pps[clean_pps["class"] == "Generator"]
         if len(clean_gen) > 0:
@@ -425,6 +433,7 @@ class AddBaseNetwork:
                     clean_pps.reset_index(),
                     self.availability_dir,
                     self.technologies_dir,
+                    scenario=self.scenario,
                 )
                 .reindex(clean_gen.index)
                 .T.set_index(self.network.snapshots),
@@ -463,6 +472,7 @@ class AddBaseNetwork:
             year=self.year,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
         # ensure all efficiency columns are filled
         eff_columns = [x for x in links_df.columns if "efficiency" in x]
@@ -487,7 +497,10 @@ class AddBaseNetwork:
             marginal_cost=links_df["marginal_cost"],
             p_nom=links_df["p_nom"],
             p_max_pu=get_link_availabilities(
-                links_df.reset_index(), self.availability_dir, self.technologies_dir
+                links_df.reset_index(),
+                self.availability_dir,
+                self.technologies_dir,
+                scenario=self.scenario,
             )
             .reindex(links_df.index)
             .T.set_index(self.network.snapshots),
@@ -509,7 +522,9 @@ class AddBaseNetwork:
     def add_ev_chargers(self):
         """Add PEV chargers to the PyPSA network."""
         ev_links_df = pd.read_csv(snakemake.input.tra_pev_chargers).set_index("link")
-        tech_costs_df = pd.read_csv(snakemake.input.power_plant_costs)
+        tech_costs_df = read_global_input(
+            snakemake.input.power_plant_costs, self.scenario
+        )
         tech_costs_df = tech_costs_df[
             (tech_costs_df["country"].str.contains("|".join(self.country)))
         ].set_index(["powerplant_type", "country"])
@@ -525,12 +540,14 @@ class AddBaseNetwork:
             cost_df=tech_costs_df,
             interest_dict=self.interest,
             currency=self.currency,
+            scenario=self.scenario,
         )
         link_p_max_pu = (
             get_link_availabilities(
                 ev_links_df.reset_index(),
                 self.availability_dir,
                 self.technologies_dir,
+                scenario=self.scenario,
             )
             .reindex(ev_links_df.index)
             .T.set_index(self.network.snapshots)
@@ -569,12 +586,14 @@ class AddBaseNetwork:
             tech_table=ev_storages,
             year=self.year,
             ev_param_dir=snakemake.input.ev_parameters,
+            scenario=self.scenario,
         )
 
         ev_store_e_min_pu = (
             get_store_min_availabilities(
                 ev_storages.reset_index(),
                 avail_dir=self.availability_dir,
+                scenario=self.scenario,
             )
             .reindex(ev_storages.index)
             .T.set_index(self.network.snapshots)

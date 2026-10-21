@@ -10,6 +10,7 @@ and converter links for power, industry and transport sectors.
 """
 
 import itertools
+import logging
 import os
 import shutil
 import warnings
@@ -27,6 +28,8 @@ from pandas.errors import SettingWithCopyWarning
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 warnings.simplefilter(action="ignore", category=FutureWarning)
+
+logger = logging.getLogger(__name__)
 
 # Data definitions and helper functions
 
@@ -1628,6 +1631,25 @@ def update_technologies(
     final_technologies.to_csv(save_path, index=False)
 
 
+def update_scenario_column(save_path: FilePath, scenario: str):
+    """Fill the scenario column of a global input csv with the input scenario name.
+
+    Parameters
+    ----------
+    save_path : FilePath (str or path object)
+        Path to the global input csv.
+    scenario : str
+        Input scenario name, i.e. ``path_configs.input_scenario_name``.
+    """
+    global_df = pd.read_csv(save_path)
+    global_df["scenario"] = scenario
+    # Keep scenario as the first column
+    global_df = global_df[
+        ["scenario"] + [col for col in global_df.columns if col != "scenario"]
+    ]
+    global_df.to_csv(save_path, index=False)
+
+
 def create_folders(save_path: FilePath, sector_folder: bool = False):
     """Create the main output directory and subdirectories for each sector.
 
@@ -1700,11 +1722,8 @@ if __name__ == "__main__":
     )
 
     # Skeleton input scenario folder path
-    input_scenario_folder_path = (
-        project_folder_path
-        + "/input/"
-        + configurations["path_configs"]["input_scenario_name"]
-    )
+    input_scenario_name = configurations["path_configs"]["input_scenario_name"]
+    input_scenario_folder_path = project_folder_path + "/input/" + input_scenario_name
 
     # Only a new project folder, or a new scenario folder in the existed project folder
     # is allowed.
@@ -1773,6 +1792,26 @@ if __name__ == "__main__":
             save_path=path_technologies,
             countries=cfg_countries,
         )
+        # Assign all global input rows to the new input scenario
+        for path in [
+            path_availability,
+            path_demand_profiles,
+            path_ev_params,
+            path_power_plant_cost,
+            path_potentials,
+            path_storage_costs,
+            path_storage_inflows,
+            path_technologies,
+        ]:
+            update_scenario_column(save_path=path, scenario=input_scenario_name)
+    else:
+        # Global inputs of an existing project are not changed
+        message = (
+            f"Project `{project_folder_path}` already exists. Please add "
+            + f"'{input_scenario_name}' to the 'scenario' column of the global input "
+            + f"CSVs in `{global_input_path}` for the rows this scenario should use."
+        )
+        logger.warning(message)
 
     # create_skeleton_inputs for regional templates
     create_folders(save_path=input_scenario_folder_path, sector_folder=True)

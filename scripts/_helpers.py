@@ -9,6 +9,7 @@ import logging
 import math
 import os
 import urllib
+from difflib import get_close_matches
 from itertools import cycle
 from os import PathLike
 from pathlib import Path
@@ -32,6 +33,8 @@ from snakemake.settings.types import (
 )
 
 FilePath = Union[str, PathLike[str]]
+
+logger = logging.getLogger(__name__)
 
 agora_style = {
     "line_width": 2,
@@ -486,8 +489,76 @@ def get_buses(bus_df: pd.DataFrame) -> pd.DataFrame:
     return bus_df
 
 
+def read_global_input(file_dir: FilePath, scenario: str) -> pd.DataFrame:
+    """Read a global input CSV and keep only the rows of the given scenario.
+
+    The ``scenario`` column lists the input scenario(s) each row applies to, separated
+    by ``;`` (e.g. ``scenario_01;scenario_02``). It is dropped after filtering so the
+    table has the same columns as before.
+
+    Warnings are logged for likely input mistakes: a CSV without a ``scenario`` column
+    (all rows are used) and rows with an empty ``scenario`` cell (they are ignored).
+
+    Parameters
+    ----------
+    file_dir : FilePath
+        path to the global input CSV
+    scenario : str
+        input scenario name, i.e. ``path_configs.input_scenario_name`` in
+        base_config.yaml
+
+    Returns
+    -------
+    pd.DataFrame
+        rows of the global input CSV that apply to the scenario
+
+    Raises
+    ------
+    ValueError
+        If no row in the CSV applies to the scenario (e.g. a typo in the scenario
+        name)
+    """
+    df = pd.read_csv(file_dir)
+    if "scenario" not in df.columns:
+        message = (
+            f"No 'scenario' column in {file_dir}. All rows are used for scenario "
+            + f"'{scenario}'. Please add a 'scenario' column as the first column."
+        )
+        logger.warning(message)
+        return df
+
+    # Split ";"-separated scenario names and strip spaces around each name
+    row_scenarios = (
+        df["scenario"]
+        .fillna("")
+        .astype(str)
+        .str.split(";")
+        .apply(lambda names: [n.strip() for n in names if n.strip()])
+    )
+    empty_rows = row_scenarios.apply(len) == 0
+    if empty_rows.any():
+        message = (
+            f"{empty_rows.sum()} rows in {file_dir} have an empty 'scenario' cell "
+            + f"and are ignored (CSV lines {list(df.index[empty_rows] + 2)})."
+        )
+        logger.warning(message)
+
+    keep = row_scenarios.apply(lambda names: scenario in names)
+    if not keep.any():
+        # Point to the closest scenario name to help spot typos
+        available = sorted(set(row_scenarios.sum()))
+        close_matches = get_close_matches(scenario, available, n=1)
+        hint = f" Did you mean '{close_matches[0]}'?" if close_matches else ""
+        raise ValueError(
+            f"Scenario '{scenario}' (input_scenario_name in base_config.yaml) is not "
+            + f"found in the 'scenario' column of {file_dir}. Available scenarios: "
+            + f"{available}.{hint} Please check for typos."
+        )
+    return df[keep].drop(columns="scenario").reset_index(drop=True)
+
+
 def get_time_series_demands(
-    load_df: pd.DataFrame, profile_dir: FilePath, year: int
+    load_df: pd.DataFrame, profile_dir: FilePath, year: int, scenario: str
 ) -> pd.DataFrame:
     """Convert total load per buses into timeseries for 8760 h based on profile pattern.
 
@@ -499,6 +570,8 @@ def get_time_series_demands(
         directory to database of profile patterns per bus type
     year : int
         load year to convert
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
@@ -512,7 +585,7 @@ def get_time_series_demands(
         If load_id has duplicate
     """
     # filter load table to only corresponding load year
-    profile_df = pd.read_csv(profile_dir)
+    profile_df = read_global_input(profile_dir, scenario)
     load_df = load_df[load_df.year == year]
 
     # Start matching profile
@@ -556,7 +629,7 @@ def get_time_series_demands(
 
 
 def get_plant_availabilities(
-    pp_df: pd.DataFrame, avail_dir: FilePath, arch_dir: FilePath
+    pp_df: pd.DataFrame, avail_dir: FilePath, arch_dir: FilePath, scenario: str
 ) -> pd.DataFrame:
     """Match each generator/storage unit to corresponding availability.
 
@@ -570,6 +643,8 @@ def get_plant_availabilities(
         directory to database of availability per location and technology
     arch_dir : FilePath
         directory to database of techno-economic params per technology
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
@@ -585,8 +660,8 @@ def get_plant_availabilities(
     # Looping through each row in pp_df to find technology info and match to
     # corresponding availability
     dfs = []
-    avail_df = pd.read_csv(avail_dir)
-    arch_df = pd.read_csv(arch_dir)
+    avail_df = read_global_input(avail_dir, scenario)
+    arch_df = read_global_input(arch_dir, scenario)
     pp_df = pp_df.to_dict("records")
     for row in pp_df:
         # filter country first
@@ -646,7 +721,7 @@ def get_plant_availabilities(
 
 
 def get_link_availabilities(
-    link_df: pd.DataFrame, avail_dir: FilePath, arch_dir: FilePath
+    link_df: pd.DataFrame, avail_dir: FilePath, arch_dir: FilePath, scenario: str
 ) -> pd.DataFrame:
     """Match each converters to corresponding availability.
 
@@ -660,6 +735,8 @@ def get_link_availabilities(
         directory to database of availability per location and technology
     arch_dir : FilePath
         directory to database of techno-economic params per technology
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
@@ -674,8 +751,8 @@ def get_link_availabilities(
     # Looping through each row in pp_df to find technology info and match to
     # corresponding availability
     dfs = []
-    avail_df = pd.read_csv(avail_dir)
-    arch_df = pd.read_csv(arch_dir)
+    avail_df = read_global_input(avail_dir, scenario)
+    arch_df = read_global_input(arch_dir, scenario)
     link_df = link_df.to_dict("records")
     for row in link_df:
         # filter country first
@@ -735,7 +812,7 @@ def get_link_availabilities(
 
 
 def get_store_min_availabilities(
-    stores_df: pd.DataFrame, avail_dir: FilePath
+    stores_df: pd.DataFrame, avail_dir: FilePath, scenario: str
 ) -> pd.DataFrame:
     """Match each storage unit to corresponding minimum availability.
 
@@ -745,6 +822,8 @@ def get_store_min_availabilities(
         Table of all storage units
     avail_dir : FilePath
         directory to database of availability per location and technology
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
@@ -758,7 +837,7 @@ def get_store_min_availabilities(
         If plant name has duplicate
     """
     dfs = []
-    avail_df = pd.read_csv(avail_dir)
+    avail_df = read_global_input(avail_dir, scenario)
     stores_df = stores_df.to_dict("records")
     for row in stores_df:
         # filter country first
@@ -795,6 +874,7 @@ def get_store_min_availabilities(
 def get_storage_units_inflows(
     storage_capacity: pd.DataFrame,
     inflows_path: FilePath,
+    scenario: str,
 ) -> pd.DataFrame:
     """Match each storage units to corresponding inflows.
 
@@ -806,6 +886,8 @@ def get_storage_units_inflows(
         DataFrame of all storage units
     inflows_path : FilePath
         inflow database
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
@@ -814,7 +896,7 @@ def get_storage_units_inflows(
         for 8760 snapshots
     """
     dfs = []
-    storage_inflows = pd.read_csv(inflows_path)
+    storage_inflows = read_global_input(inflows_path, scenario)
     storage_unit_dict = storage_capacity.to_dict("records")
 
     for row in storage_unit_dict:
@@ -925,6 +1007,7 @@ def update_tech_fact_table(
     year: int,
     interest_dict: dict,
     currency: str,
+    scenario: str,
 ) -> pd.DataFrame:
     """Process and add techno-economic columns to plants or links table.
 
@@ -942,19 +1025,23 @@ def update_tech_fact_table(
         dict of interest rate
     currency : str
         currency of model run
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
     pd.DataFrame
         Cleaned plant/link DataFrame with fact columns added
     """
-    technology_df = pd.read_csv(technologies_dir)
+    technology_df = read_global_input(technologies_dir, scenario)
     # ramp costs are optional in technologies.csv (default: no ramp costs)
     ramp_cost_columns = ["ramp_up_cost", "ramp_down_cost"]
     technology_df[ramp_cost_columns] = (
         technology_df.reindex(columns=ramp_cost_columns).astype(float).fillna(0)
     )
-    tech_costs = pd.read_csv(tech_costs_dir, index_col=["powerplant_type", "country"])
+    tech_costs = read_global_input(tech_costs_dir, scenario).set_index(
+        ["powerplant_type", "country"]
+    )
     # filter tech cost table to only corresponding model year
     tech_costs = tech_costs[tech_costs.year == year]
 
@@ -1051,6 +1138,7 @@ def update_storage_costs(
     year: int,
     interest_dict: dict,
     currency: str,
+    scenario: str,
 ) -> pd.DataFrame:
     """Update storage cost parameters.
 
@@ -1071,6 +1159,8 @@ def update_storage_costs(
         dict of interest rate.
     currency : str
         Currency in all uppercase, , ISO4217 format
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
@@ -1079,8 +1169,8 @@ def update_storage_costs(
         'capital_cost', 'marginal_cost', 'lifetime', 'inv_cost', 'fom_cost'.
     """
     # Load and filter storage cost data for the specified year
-    storage_costs_df = pd.read_csv(
-        storage_costs_dir, index_col=["storage_type", "country"]
+    storage_costs_df = read_global_input(storage_costs_dir, scenario).set_index(
+        ["storage_type", "country"]
     )
     storage_costs_df = storage_costs_df[storage_costs_df.year == year]
 
@@ -1138,6 +1228,7 @@ def update_ev_char_parameters(
     year: int,
     interest_dict: dict,
     currency: str,
+    scenario: str,
 ) -> pd.DataFrame:
     """Update ev storage and link parameters parameters.
 
@@ -1155,13 +1246,15 @@ def update_ev_char_parameters(
         dict of interest rate.
     currency : str
         Currency in all uppercase, , ISO4217 format
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
     pd.DataFrame
         Cleaned EV charger DataFrame with parameters updated
     """
-    ev_param_df = pd.read_csv(ev_param_dir)
+    ev_param_df = read_global_input(ev_param_dir, scenario)
     cost_df_single_year = cost_df[cost_df.year == year]
     dfs = []
     for index, row in tech_df.iterrows():
@@ -1240,6 +1333,7 @@ def update_ev_store_parameters(
     tech_table: pd.DataFrame,
     year: int,
     ev_param_dir: FilePath,
+    scenario: str,
 ) -> pd.DataFrame:
     """Calculate parameters for electric vehicle storage.
 
@@ -1251,13 +1345,15 @@ def update_ev_store_parameters(
         year of model run
     ev_param_dir : FilePath
         directory of EV parameter database
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
     pd.DataFrame
         Cleaned EV storage table with parameters updated
     """
-    ev_param_df = pd.read_csv(ev_param_dir)
+    ev_param_df = read_global_input(ev_param_dir, scenario)
     dfs = []
     for index, row in tech_table.iterrows():
         # matching the type of ev with the storage capacity
@@ -1286,7 +1382,7 @@ def update_ev_store_parameters(
 
 
 def get_link_min_availabilities(
-    link_dir: FilePath, avail_dir: FilePath
+    link_dir: FilePath, avail_dir: FilePath, scenario: str
 ) -> pd.DataFrame:
     """Match each links to corresponding maximum reverse flow based on technology.
 
@@ -1296,6 +1392,8 @@ def get_link_min_availabilities(
         directory to a table of link to match
     avail_df_dir : FilePath
         directory to database of availability per location and technology
+    scenario : str
+        input scenario name used to filter the global input CSVs
 
     Returns
     -------
@@ -1304,7 +1402,7 @@ def get_link_min_availabilities(
         for 8760 snapshots
     """
     link_df = pd.read_csv(link_dir)
-    avail_df = pd.read_csv(avail_dir)
+    avail_df = read_global_input(avail_dir, scenario)
     dfs = []
     link_df = link_df.to_dict("records")
     for row in link_df:
