@@ -9,6 +9,7 @@ import logging
 import math
 import os
 import urllib
+from difflib import get_close_matches
 from itertools import cycle
 from os import PathLike
 from pathlib import Path
@@ -32,6 +33,8 @@ from snakemake.settings.types import (
 )
 
 FilePath = Union[str, PathLike[str]]
+
+logger = logging.getLogger(__name__)
 
 agora_style = {
     "line_width": 2,
@@ -484,6 +487,74 @@ def get_buses(bus_df: pd.DataFrame) -> pd.DataFrame:
     """
     bus_df = bus_df[["bus", "carrier", "node", "country"]].set_index("bus")
     return bus_df
+
+
+def read_global_input(file_dir: FilePath, scenario: str) -> pd.DataFrame:
+    """Read a global input CSV and keep only the rows of the given scenario.
+
+    The ``scenario`` column lists the input scenario(s) each row applies to, separated
+    by ``;`` (e.g. ``scenario_01;scenario_02``). It is dropped after filtering so the
+    table has the same columns as before.
+
+    Warnings are logged for likely input mistakes: a CSV without a ``scenario`` column
+    (all rows are used) and rows with an empty ``scenario`` cell (they are ignored).
+
+    Parameters
+    ----------
+    file_dir : FilePath
+        path to the global input CSV
+    scenario : str
+        input scenario name, i.e. ``path_configs.input_scenario_name`` in
+        base_config.yaml
+
+    Returns
+    -------
+    pd.DataFrame
+        rows of the global input CSV that apply to the scenario
+
+    Raises
+    ------
+    ValueError
+        If no row in the CSV applies to the scenario (e.g. a typo in the scenario
+        name)
+    """
+    df = pd.read_csv(file_dir)
+    if "scenario" not in df.columns:
+        message = (
+            f"No 'scenario' column in {file_dir}. All rows are used for scenario "
+            + f"'{scenario}'. Please add a 'scenario' column as the first column."
+        )
+        logger.warning(message)
+        return df
+
+    # Split ";"-separated scenario names and strip spaces around each name
+    row_scenarios = (
+        df["scenario"]
+        .fillna("")
+        .astype(str)
+        .str.split(";")
+        .apply(lambda names: [n.strip() for n in names if n.strip()])
+    )
+    empty_rows = row_scenarios.apply(len) == 0
+    if empty_rows.any():
+        message = (
+            f"{empty_rows.sum()} rows in {file_dir} have an empty 'scenario' cell "
+            + f"and are ignored (CSV lines {list(df.index[empty_rows] + 2)})."
+        )
+        logger.warning(message)
+
+    keep = row_scenarios.apply(lambda names: scenario in names)
+    if not keep.any():
+        # Point to the closest scenario name to help spot typos
+        available = sorted(set(row_scenarios.sum()))
+        close_matches = get_close_matches(scenario, available, n=1)
+        hint = f" Did you mean '{close_matches[0]}'?" if close_matches else ""
+        raise ValueError(
+            f"Scenario '{scenario}' (input_scenario_name in base_config.yaml) is not "
+            + f"found in the 'scenario' column of {file_dir}. Available scenarios: "
+            + f"{available}.{hint} Please check for typos."
+        )
+    return df[keep].drop(columns="scenario").reset_index(drop=True)
 
 
 def get_time_series_demands(
