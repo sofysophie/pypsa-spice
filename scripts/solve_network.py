@@ -332,7 +332,10 @@ if __name__ == "__main__":
     )
     if y > snakemake.params.years[0]:  # Only do for year which is not baseyear
         renewable_potential_constraint(
-            n, snakemake.input.re_technical_potential, year=y
+            n,
+            snakemake.input.re_technical_potential,
+            year=y,
+            scenario=snakemake.config["path_configs"]["input_scenario_name"],
         )
     n.export_to_netcdf(snakemake.output.pre_solved)
     n = solve_network(n, y, scenario_configs=sc_configs)

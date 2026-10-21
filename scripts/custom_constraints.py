@@ -23,14 +23,14 @@ import numpy as np
 import pandas as pd
 import pypsa
 import xarray as xr
-from _helpers import FilePath
+from _helpers import FilePath, read_global_input
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 
 RAMP_COST_COLUMNS = ["ramp_up_cost", "ramp_down_cost"]
 
 
 def renewable_potential_constraint(
-    n: pypsa.Network, technical_potential: FilePath, year: int
+    n: pypsa.Network, technical_potential: FilePath, year: int, scenario: str
 ):
     """Add constraint on installed capacity of renewables.
 
@@ -45,13 +45,15 @@ def renewable_potential_constraint(
         Path to a CSV file containing the technical potential data.
     year : int
         The year of optimization for which the constraint is applied.
+    scenario : str
+        Input scenario name used to filter the technical potential data.
 
     Raises
     ------
     ValueError
         If existing capacities exceed the technical potential for any asset.
     """
-    technical_potential_df = pd.read_csv(technical_potential)
+    technical_potential_df = read_global_input(technical_potential, scenario)
 
     for c in ["Generator", "StorageUnit", "Link"]:
         comp_potential_df = technical_potential_df[
