@@ -20,8 +20,8 @@ logging:
 path_configs:
   data_folder_name: Colombia
   project_name: Expansion 26-40
-  input_scenario_name: BAU
-  output_scenario_name: BAU results
+  input_scenario_name: BAU_HIDRO90
+  output_scenario_name: BAU_HIDRO90 results
 
 base_configs:
   countries: ["CO"] # list of countries in ISO2 format
